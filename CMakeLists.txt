@@ -9,8 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # add DB_File library
 set(sources
-    classes/db_file.h
-    classes/db_file.cpp
     classes/database.h
     classes/database.cpp
 )
