@@ -9,22 +9,101 @@
 
 using namespace std;
 
-string get_text(string band_name, string song_title);
+string get_text(string band_name, string song_title,  Database & database);
 string parse_page(string & source_page);
+string client_request(string url);
+void parse_input(string & input,  bool first_capital);
 
 int main(int argc, char** argv) {    
-    Database new_db("lyrics_db");
-    Db_file new_file("tmp.txt", get_text("asd","Asd"));
-    new_db.add_file(new_file);
+    Database lyrics_db("lyrics_db");
+    while (1)
+    {
+        string band_name, song_title;
+        cout<<"band name: "; 
+        cin>>band_name;
+        cout<<"song title: ";
+        cin>>song_title;
+        cout << get_text(band_name,song_title, lyrics_db) << "\n\n";
+    }
+    
     return 0;
 }
 
-string get_text(string band_name, string song_title) {
-    cpr::Response r = cpr::Get(cpr::Url{"https://www.tekstowo.pl/piosenka,rammstein,zick_zack.html"},
+
+string get_text(string band_name, string song_title, Database & database) {    
+    int band_mode[] = {0, 1, 0, 1}, song_mode[] = {0, 0, 1, 1};
+    for(int i = 0; i < 4; i++) {
+        parse_input(band_name, band_mode[i]);
+        parse_input(song_title, song_mode[i]);
+        string url = "https://www.tekstowo.pl/piosenka," + band_name + "," + song_title + ".html";
+        string resposne = client_request(url);
+        if(resposne != "-1" && resposne != "-2") {
+            string tmp = parse_page(resposne);
+            cout<<tmp<<endl<<endl;
+            parse_input(band_name, 0);
+            parse_input(song_title, 0);
+            string file_name = band_name + "_" + song_title + ".txt";
+            Db_file new_file(file_name, tmp);
+            database.add_file(new_file);
+            return tmp;
+        }
+    }
+    return "song: " + song_title + " by: " + band_name + " is unavailable on tekstowo.pl at the moment";
+}
+
+void parse_input(string & input, bool first_capital) {
+    for(int i = 0; i < input.size(); i++) {
+        switch (input[i]) {
+        case 'ą':
+            input[i] = 'a';
+            break;
+        case 'ć':
+            input[i] = 'c';
+            break;
+        case 'ę':
+            input[i] = 'e';
+            break;
+        case 'ł':
+            input[i] = 'l';
+            break;
+        case 'ń':
+            input[i] = 'n';
+            break;
+        case 'ó':
+            input[i] = 'o';
+            break;
+        case 'ś':
+            input[i] = 's';
+            break;
+        case 'ź':
+            input[i] = 'z';
+            break;
+        case 'ż':
+            input[i] = 'z';
+            break;
+        case ' ':
+            input[i] = '_';
+            break;
+        default:
+            break;
+        }
+        input[i] = tolower(input[i]);
+    }
+    if(first_capital)
+        input[0] = toupper(input[0]);
+}
+
+string client_request(string url) {
+    cpr::Response r = cpr::Get(cpr::Url{url},
                                cpr::Authentication{"user", "pass"},
                                cpr::Parameters{{"anon", "true"}, {"key", "value"}});
-    
-    return parse_page(r.text);
+
+     if(r.status_code == 404) {
+        return "-1";
+    } else if (r.status_code != 200) {
+        return "-2";
+    }                          
+    return r.text;
 }
 
 string parse_page(string & source_page) {
