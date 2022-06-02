@@ -7,6 +7,13 @@ project(lyrics_db VERSION 1.0)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# add DB_File library
+set(sources
+    classes/db_file.h
+    classes/db_file.cpp
+)
+
+add_library(db_file STATIC ${sources})
 # add the executable
 add_executable(lyrics_db main.cpp)
 
@@ -20,4 +27,4 @@ FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
                          GIT_TAG ee7f91f5566b6279aadf6d0b1aaf56b11963f527) # The commit hash for 1.8.2. Replace with the latest from: https://github.com/libcpr/cpr/releases
 FetchContent_MakeAvailable(cpr)
 
-target_link_libraries(lyrics_db PRIVATE cpr::cpr)
+target_link_libraries(lyrics_db PRIVATE cpr::cpr db_file)

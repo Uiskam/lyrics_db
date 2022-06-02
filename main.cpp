@@ -1,9 +1,9 @@
 #include <iostream>
 #include <string>
 #include <cpr/cpr.h>
+#include "classes/db_file.h"
 
-int main(int argc, char** argv) {
-    std::cout<<"HERE\n";
+void example_funciton() {
     cpr::Response r = cpr::Get(cpr::Url{"https://api.github.com/repos/whoshuu/cpr/contributors"},
                                cpr::Authentication{"user", "pass"},
                                cpr::Parameters{{"anon", "true"}, {"key", "value"}});
@@ -14,5 +14,12 @@ int main(int argc, char** argv) {
         std::cout << '\t' << kv.first << ':' << kv.second << '\n';
     }
     std::cout << "Text: " << r.text << '\n';
+}
+
+int main(int argc, char** argv) {
+    
+    
+    Db_file newFile("dupa", "chuj");
+    cout << "file name " << newFile.get_file_name() << endl;
     return 0;
 }
