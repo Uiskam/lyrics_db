@@ -16,6 +16,7 @@ void parse_input(string & input,  bool first_capital);
 
 int main(int argc, char** argv) {    
     Database lyrics_db("lyrics_db");
+    cout<<"CHUJ LURWA\n";
     while (1)
     {
         string band_name, song_title;
