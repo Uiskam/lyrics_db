@@ -1,6 +1,8 @@
 {
     "files.associations": {
-        "*.in": "cpp"
+        "*.in": "cpp",
+        "fstream": "cpp",
+        "iostream": "cpp"
     },
     "cmake.configureOnOpen": true
 }
