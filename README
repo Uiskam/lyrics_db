@@ -1,8 +1,0 @@
-BUILD:
-mkdir build
-cd build
-cmake ..
-cmake --build .
-
-RUN:
-.\Debug\Lyrics_Base.exe
