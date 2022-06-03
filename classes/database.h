@@ -59,6 +59,8 @@ class Database {
 
         void clear_db();
 
+        void print_db();
+        
     private:
         fs::path db_name;
 };

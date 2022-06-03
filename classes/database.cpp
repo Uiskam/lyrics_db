@@ -38,3 +38,9 @@ void Database::clear_db() {
         fs::remove_all(path);
     }
 }
+
+void Database::print_db() {
+    for (const auto & entry : fs::directory_iterator(this->db_name)) {
+        std::cout << entry.path().filename() << std::endl;
+    }
+}
