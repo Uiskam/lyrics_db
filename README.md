@@ -7,7 +7,8 @@ Just run the program and follow instructions :)
 ### Requirements
 - cmake 3.10 or newer
 - msgedge.exe location must be added to PATH (C:\Program Files (x86)\Microsoft\Edge\Application is a deafult installation location)
-- internnet connection is necessary.
+- internnet connection is necessary
+- gcc and g++ compilers
 ### Build
 To build and use lyrics finder you must:
 - download latest release
