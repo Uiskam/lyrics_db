@@ -18,22 +18,28 @@ string pick_song_from_db();
 void parse_input(string & input,  bool first_capital);
 
 int main(int argc, char** argv) {   
-    system("cls"); 
-    system("edge.exe http://google.com");
+    system("cls");
     Database lyrics_db("lyrics_db");
     while (1)
     {
         string band_name, song_title;
         string mode_in;
-        cout<<"0 for native lyrics\n"
-        "1 for translated ones\n"
-        "2 to display selected lyrics in notepad\n"
-        "3 to remove lyrics from database\n"
-        "4 to display all items in databse\n" 
-        "5 to search for any song in YouTube\n" 
-        "6 to pick song from databse and search for it in YouTube\n" 
+        cout<<"Lyrics dowload:\n"
+        "0 for native lyrics\n"
+        "1 for translated ones\n\n"
+        
+        "Database functons:\n"
+        "2 to display all items in databse\n" //2
+        "3 to remove lyrics from database\n"//3
+        "10 to ERASE ALL DATA\n\n"
+        
+        "Display lyrics or search for songs:\n"
+        "4 to display selected lyrics in notepad\n" //4
+        "5 to pick song from databse and search for it in YouTube\n"  //5
+        "6 to search for any song in YouTube\n\n" //6
+        
         "9 to quit the program\n"
-        "10 to ERASE ALL DATA\nchosen (enter to confirm): ";
+        "chosen (enter to confirm): ";
         getline(cin, mode_in);
         int mode = stoi(mode_in);
         if(mode == 9) {
@@ -41,7 +47,7 @@ int main(int argc, char** argv) {
             cout<<"Thank you for using lyrics_finder :)\n";
             return 0;
         }
-        if(mode != 4 && mode != 6 && mode != 2 && mode != 3) {
+        if(mode != 4 && mode != 5 && mode != 2 && mode != 3 && mode != 10) {
             cout<<"band name: "; 
             getline(cin, band_name);
             cout<<"song title: ";
@@ -59,15 +65,10 @@ int main(int argc, char** argv) {
         case 1:
             cout << get_text(band_name,song_title, lyrics_db, mode) << endl;
             break;
-        case 2:
-            {
-                string requested_song = lyrics_db.pick_song_from_db();
-                if(requested_song != "-1") {
-                    Db_file file_to_display(requested_song,"");
-                    string str_system_call = "notepad.exe " + lyrics_db.get_file_name(file_to_display);
-                    system( str_system_call.c_str() );
-                }
-            }
+        case 2: 
+            cout << "databse begin\n";
+            lyrics_db.print_db();
+            cout << "end of database\n";
             break;
         case 3:
             {
@@ -78,10 +79,32 @@ int main(int argc, char** argv) {
                 }
             }
             break;
-        case 4: 
-            lyrics_db.print_db();
+        case 4:
+            {
+                string requested_song = lyrics_db.pick_song_from_db();
+                if(requested_song != "-1") {
+                    Db_file file_to_display(requested_song,"");
+                    string str_system_call = "notepad.exe " + lyrics_db.get_file_name(file_to_display);
+                    system( str_system_call.c_str() );
+                }
+            }
             break;
         case 5:
+            {
+                string requested_song = lyrics_db.pick_song_from_db();
+                if(requested_song != "-1") {
+                    for(size_t i  = 0; i < requested_song.size(); i++) {
+                        if(requested_song[i] == '_')
+                            requested_song[i] = '+';
+                    }
+                    string str_system_call = "msedge.exe https://www.youtube.com/results?search_query=" + requested_song.substr(0, requested_song.size() - 4);
+                    cout << "CALL "<< str_system_call << endl;
+                    system(str_system_call.c_str());
+                }
+
+            }
+            break;
+        case 6:
             {
                 parse_input(band_name, 0);
                 parse_input(song_title, 0);
@@ -98,23 +121,8 @@ int main(int argc, char** argv) {
                 system(str_system_call.c_str());
             }
             break; 
-        case 6:
-            {
-                string requested_song = lyrics_db.pick_song_from_db();
-                if(requested_song != "-1") {
-                    for(size_t i  = 0; i < requested_song.size(); i++) {
-                        if(requested_song[i] == '_')
-                            requested_song[i] = '+';
-                    }
-                    string str_system_call = "msedge.exe https://www.youtube.com/results?search_query=" + requested_song.substr(0, requested_song.size() - 4);
-                    cout << "CALL "<< str_system_call << endl;
-                    system(str_system_call.c_str());
-                }
-
-            }
-            break;
         case 10:
-            cout << get_text(band_name,song_title, lyrics_db, mode) << "\n\n";
+            lyrics_db.clear_db();
             break;
         default:
             cout << "Wrong mode!\n";
