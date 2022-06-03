@@ -60,7 +60,10 @@ class Database {
         void clear_db();
 
         void print_db();
-        
+
+        string pick_song_from_db();
+              
     private:
         fs::path db_name;
+        string get_nth_song_name(int n);
 };

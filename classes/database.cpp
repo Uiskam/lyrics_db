@@ -40,7 +40,29 @@ void Database::clear_db() {
 }
 
 void Database::print_db() {
+    int index = 1;
     for (const auto & entry : fs::directory_iterator(this->db_name)) {
-        std::cout << entry.path().filename() << std::endl;
+        cout << "song no " << index++ << ": " << entry.path().filename() << endl;
     }
+}
+
+string Database::get_nth_song_name(int n) {
+    int index = 1;
+    for (const auto & entry : fs::directory_iterator(this->db_name)) {
+        if(index++ == n) return entry.path().filename().u8string();
+    }
+    return "Song with nb " + to_string(n) + " do not exisit in databse!";
+}
+
+string Database::pick_song_from_db() {
+    this->print_db();
+    string str_song_index;
+    cout << "Song no: ";
+    getline(cin, str_song_index);
+    string requested_song  = this->get_nth_song_name(stoi(str_song_index));
+    if(requested_song.find("do not exisit in databse") != string::npos) {
+        cout << requested_song << endl;
+        return "-1";
+    } 
+    return requested_song;
 }

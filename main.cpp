@@ -7,12 +7,14 @@
 #include <filesystem>
 #include "classes/database.h"
 
+
 using namespace std;
 
 string get_text(string band_name, string song_title,  Database & database, int mode);
 string parse_page(string & source_page, int mode);
 string client_request(string url);
 string clear_frontend_spaces(const string & input);
+string pick_song_from_db();
 void parse_input(string & input,  bool first_capital);
 
 int main(int argc, char** argv) {   
@@ -25,24 +27,25 @@ int main(int argc, char** argv) {
         string mode_in;
         cout<<"0 for native lyrics\n"
         "1 for translated ones\n"
-        "2 to display orignial lyrics\n"
-        "3 to display translated lyrics\n"
+        "2 to display selected lyrics in notepad\n"
+        "3 to remove lyrics from database\n"
         "4 to display all items in databse\n" 
-        "5 to to search for song in YouTube\n" 
+        "5 to search for any song in YouTube\n" 
+        "6 to pick song from databse and search for it in YouTube\n" 
         "9 to quit the program\n"
         "10 to ERASE ALL DATA\nchosen (enter to confirm): ";
-        getline(cin, mode_in,'\n');
+        getline(cin, mode_in);
         int mode = stoi(mode_in);
         if(mode == 9) {
             system("cls");
             cout<<"Thank you for using lyrics_finder :)\n";
             return 0;
         }
-        if(mode != 4) {
+        if(mode != 4 && mode != 6 && mode != 2 && mode != 3) {
             cout<<"band name: "; 
-            getline(cin, band_name,'\n');
+            getline(cin, band_name);
             cout<<"song title: ";
-            getline(cin, song_title,'\n');
+            getline(cin, song_title);
             cout<<"band "<<band_name<< " song: "<<song_title<<endl;
             band_name = clear_frontend_spaces(band_name);
             song_title = clear_frontend_spaces(song_title);
@@ -57,45 +60,59 @@ int main(int argc, char** argv) {
             cout << get_text(band_name,song_title, lyrics_db, mode) << endl;
             break;
         case 2:
-            parse_input(band_name, 0);
-            parse_input(song_title, 0);
-            {Db_file file_to_display(band_name + "_" + song_title + "_oryginal.txt", "");
-            if(fs::exists(lyrics_db.get_file_name(file_to_display))) {
-                string str_system_call = "notepad.exe " + lyrics_db.get_file_name(file_to_display);
-                system( str_system_call.c_str() );
-            } else {
-                cout << "requested song is not present in database\n";
-            }}
+            {
+                string requested_song = lyrics_db.pick_song_from_db();
+                if(requested_song != "-1") {
+                    Db_file file_to_display(requested_song,"");
+                    string str_system_call = "notepad.exe " + lyrics_db.get_file_name(file_to_display);
+                    system( str_system_call.c_str() );
+                }
+            }
             break;
         case 3:
-            parse_input(band_name, 0);
-            parse_input(song_title, 0);
-            {Db_file file_to_display(band_name + "_" + song_title + "_translated.txt", "");
-            if(fs::exists(lyrics_db.get_file_name(file_to_display))) {
-                string str_system_call = "notepad.exe " + lyrics_db.get_file_name(file_to_display);
-                system( str_system_call.c_str() );
-            } else {
-                cout << "requested song is not present in database\n";
-            }}
+            {
+                string requested_song = lyrics_db.pick_song_from_db();
+                if(requested_song != "-1") {
+                    Db_file file_to_remove(requested_song,"");
+                    lyrics_db.remove_file(file_to_remove);
+                }
+            }
             break;
         case 4: 
             lyrics_db.print_db();
             break;
         case 5:
-            {parse_input(band_name, 0);
-            parse_input(song_title, 0);
-            for(int i =  0; i < band_name.size(); i++) {
-                if(band_name[i] == '_')
-                    band_name[i] = '+';
+            {
+                parse_input(band_name, 0);
+                parse_input(song_title, 0);
+                for(int i =  0; i < band_name.size(); i++) {
+                    if(band_name[i] == '_')
+                        band_name[i] = '+';
+                }
+                for(int i =  0; i < song_title.size(); i++) {
+                    if(song_title[i] == '_')
+                        song_title[i] = '+';
+                }
+                string str_system_call = "msedge.exe https://www.youtube.com/results?search_query=" + band_name + "+" + song_title;
+                cout << str_system_call.c_str() << endl;
+                system(str_system_call.c_str());
             }
-            for(int i =  0; i < song_title.size(); i++) {
-                if(song_title[i] == '_')
-                    song_title[i] = '+';
-            }
-            string str_system_call = "msedge.exe https://www.youtube.com/results?search_query=" + band_name + "+" + song_title;
-            cout << str_system_call.c_str() << endl;
-            system(str_system_call.c_str());}
             break; 
+        case 6:
+            {
+                string requested_song = lyrics_db.pick_song_from_db();
+                if(requested_song != "-1") {
+                    for(size_t i  = 0; i < requested_song.size(); i++) {
+                        if(requested_song[i] == '_')
+                            requested_song[i] = '+';
+                    }
+                    string str_system_call = "msedge.exe https://www.youtube.com/results?search_query=" + requested_song.substr(0, requested_song.size() - 4);
+                    cout << "CALL "<< str_system_call << endl;
+                    system(str_system_call.c_str());
+                }
+
+            }
+            break;
         case 10:
             cout << get_text(band_name,song_title, lyrics_db, mode) << "\n\n";
             break;
@@ -189,14 +206,14 @@ string parse_page(string & source_page, int mode) {
 
 string clear_frontend_spaces(const string & input) {
     string prased_input = "";
-    int input_begin = 0, input_end = input.size() - 1;
+    size_t input_begin = 0, input_end = input.size() - 1;
     for(int i = 0; i < input.size() && input[i] == ' '; i++) {
         input_begin++;
     }
-    for(int i = input.size() - 1; i >=  0 && input[i] == ' '; i--) {
+    for(size_t i = input.size() - 1; i >=  0 && input[i] == ' '; i--) {
         input_end--;
     }
-    for(int i = input_begin; i <= input_end; i++) {
+    for(size_t i = input_begin; i <= input_end; i++) {
         prased_input += input[i];
     }
     return prased_input;
