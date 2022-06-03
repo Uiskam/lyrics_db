@@ -1,4 +1,5 @@
-# Lyris finder
+# Lyrics_finder
+
 ### Description
 Lyrics finder is a program used to search for and store your favourite lyrics on tekstowo.pl. Program also allows you to search for songs on YT. 
 ### Requirements
