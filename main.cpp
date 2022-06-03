@@ -9,29 +9,41 @@
 
 using namespace std;
 
-string get_text(string band_name, string song_title,  Database & database);
-string parse_page(string & source_page);
+string get_text(string band_name, string song_title,  Database & database, int mode);
+string parse_page(string & source_page, int mode);
 string client_request(string url);
 void parse_input(string & input,  bool first_capital);
 
 int main(int argc, char** argv) {    
     Database lyrics_db("lyrics_db");
-    cout<<"CHUJ LURWA\n";
     while (1)
     {
         string band_name, song_title;
+        string mode_in;
         cout<<"band name: "; 
-        cin>>band_name;
+        getline(cin, band_name,'\n');
         cout<<"song title: ";
-        cin>>song_title;
-        cout << get_text(band_name,song_title, lyrics_db) << "\n\n";
+        getline(cin, song_title,'\n');
+        cout<<"band "<<band_name<< " song: "<<song_title<<endl;
+        cout<<"version of the lyrcis (0 for native lyrics, 1 for translated ones, 2 for clearing db): ";
+        getline(cin, mode_in,'\n');
+        int mode = stoi(mode_in);
+        if(mode == 2) { 
+            lyrics_db.clear_db();
+            continue;
+        }
+        if(mode != 0 && mode != 1) {
+            cout<<"wrong mode!\n";
+            continue;
+        }
+        cout << get_text(band_name,song_title, lyrics_db, mode) << "\n\n";
     }
     
     return 0;
 }
 
 
-string get_text(string band_name, string song_title, Database & database) {    
+string get_text(string band_name, string song_title, Database & database, int mode) {    
     int band_mode[] = {0, 1, 0, 1}, song_mode[] = {0, 0, 1, 1};
     for(int i = 0; i < 4; i++) {
         parse_input(band_name, band_mode[i]);
@@ -39,55 +51,30 @@ string get_text(string band_name, string song_title, Database & database) {
         string url = "https://www.tekstowo.pl/piosenka," + band_name + "," + song_title + ".html";
         string resposne = client_request(url);
         if(resposne != "-1" && resposne != "-2") {
-            string tmp = parse_page(resposne);
-            cout<<tmp<<endl<<endl;
+            string result = parse_page(resposne, mode);
+            if(result == "-3")
+                return "song: " + song_title + " by: " + band_name + " is not translated yet!";
+            cout<<result<<endl<<endl;
             parse_input(band_name, 0);
             parse_input(song_title, 0);
-            string file_name = band_name + "_" + song_title + ".txt";
-            Db_file new_file(file_name, tmp);
+            string file_name = band_name + "_" + song_title;
+            if(mode == 0) {
+                file_name += "_oryginal.txt";
+            } else {
+                file_name += "_translated.txt";
+            }
+            Db_file new_file(file_name, result);
             database.add_file(new_file);
-            return tmp;
+            return result;
         }
+        
     }
     return "song: " + song_title + " by: " + band_name + " is unavailable on tekstowo.pl at the moment";
 }
 
 void parse_input(string & input, bool first_capital) {
     for(int i = 0; i < input.size(); i++) {
-        switch (input[i]) {
-        case 'ą':
-            input[i] = 'a';
-            break;
-        case 'ć':
-            input[i] = 'c';
-            break;
-        case 'ę':
-            input[i] = 'e';
-            break;
-        case 'ł':
-            input[i] = 'l';
-            break;
-        case 'ń':
-            input[i] = 'n';
-            break;
-        case 'ó':
-            input[i] = 'o';
-            break;
-        case 'ś':
-            input[i] = 's';
-            break;
-        case 'ź':
-            input[i] = 'z';
-            break;
-        case 'ż':
-            input[i] = 'z';
-            break;
-        case ' ':
-            input[i] = '_';
-            break;
-        default:
-            break;
-        }
+        if(input[i] == ' ') input[i] = '_';
         input[i] = tolower(input[i]);
     }
     if(first_capital)
@@ -107,8 +94,13 @@ string client_request(string url) {
     return r.text;
 }
 
-string parse_page(string & source_page) {
-    string find_translation = "translation", find_begin = "<div class=\"inner-text\">", find_end = "</div>", skip = "<br />";
+string parse_page(string & source_page, int mode) {
+    string find_translation = "translation", find_begin = "<div class=\"inner-text\">", find_end = "</div>", skip = "<br />", check_existance = "Niestety nikt nie dodał jeszcze tłumaczenia tego utworu.";    if(mode == 0) {
+        find_translation = "song-text";
+    }
+    if(source_page.find(check_existance) != string::npos) {
+        return "-3";
+    }
     string res = "";
     size_t start_id =  source_page.find(find_translation);
     start_id =  source_page.find(find_begin, start_id);

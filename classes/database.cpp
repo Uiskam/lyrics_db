@@ -32,3 +32,9 @@ void Database::remove_file(Db_file file_to_remove) {
 bool Database::find_file(Db_file file_to_find) {
     return fs::exists(this->get_file_name(file_to_find)) && fs::path(this->get_file_name(file_to_find)).extension() == ".txt";
 }
+
+void Database::clear_db() {
+    for (auto& path: fs::directory_iterator(this->db_name)) {
+        fs::remove_all(path);
+    }
+}

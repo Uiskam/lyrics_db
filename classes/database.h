@@ -57,6 +57,8 @@ class Database {
 
         bool find_file(Db_file file_to_find);
 
+        void clear_db();
+
     private:
         fs::path db_name;
 };

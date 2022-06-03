@@ -25,7 +25,7 @@ endif()
 
 include(FetchContent)
 FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
-                         GIT_TAG ee7f91f5566b6279aadf6d0b1aaf56b11963f527) # The commit hash for 1.8.2. Replace with the latest from: https://github.com/libcpr/cpr/releases
+                         GIT_TAG ee7f91f5566b6279aadf6d0b1aaf56b11963f527)
 FetchContent_MakeAvailable(cpr)
 
 target_link_libraries(lyrics_finder PRIVATE cpr::cpr db_management)
