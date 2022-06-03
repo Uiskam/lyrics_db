@@ -97,7 +97,13 @@ int main(int argc, char** argv) {
                         if(requested_song[i] == '_')
                             requested_song[i] = '+';
                     }
-                    string str_system_call = "msedge.exe https://www.youtube.com/results?search_query=" + requested_song.substr(0, requested_song.size() - 4);
+                    string str_system_call;
+                    cout<<"req "<<requested_song<<endl;
+                    if(requested_song.find("original.txt") != string::npos) {
+                        str_system_call = "msedge.exe https://www.youtube.com/results?search_query=" + band_name + "+" + requested_song.substr(0, requested_song.size() - 13);
+                    } else {
+                        str_system_call = "msedge.exe https://www.youtube.com/results?search_query=" + band_name + "+" + requested_song.substr(0, requested_song.size() - 15);
+                    }
                     cout << "CALL "<< str_system_call << endl;
                     system(str_system_call.c_str());
                 }
@@ -150,7 +156,7 @@ string get_text(string band_name, string song_title, Database & database, int mo
             parse_input(song_title, 0);
             string file_name = band_name + "_" + song_title;
             if(mode == 0) {
-                file_name += "_oryginal.txt";
+                file_name += "_original.txt";
             } else {
                 file_name += "_translated.txt";
             }
