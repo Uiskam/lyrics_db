@@ -2,6 +2,8 @@
 
 ### Description
 Lyrics finder is a program used to search for and store your favourite lyrics on tekstowo.pl. Program also allows you to search for songs on YT. 
+### Usage
+Just run the program and follow instructions :)
 ### Requirements
 - cmake 3.10 or newer
 - msgedge.exe location must be added to PATH (C:\Program Files (x86)\Microsoft\Edge\Application is a deafult installation location)
